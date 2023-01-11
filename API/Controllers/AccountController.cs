@@ -1,6 +1,7 @@
 ﻿using API.Mediator;
 using API.Models;
 using FluentResults;
+using FluentValidation.Results;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,19 +16,13 @@ public class AccountController : BaseController
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterModel request)
     {
-        var registerResult =
-            await Mediator.Send(new RegisterCommand(request.Username, request.Email, request.Password, request.Confirm));
+        return HandleResult(
+            await Mediator.Send(new RegisterCommand(request.Username, request.Email, request.Password, request.Confirm)));
+    }
 
-        if (registerResult.IsFailed)
-        {
-            return BadRequest(registerResult.Errors.FirstOrDefault());
-        }
-
-        if (registerResult.HasSuccess<Success>())
-        {
-            return Ok("different");
-        }
-
-        return Ok();
+    [HttpPost("NormalFailure")]
+    public async Task<IActionResult> Normal()
+    {
+        return HandleResult(Result.Fail("This is a normal failure"));
     }
 }
